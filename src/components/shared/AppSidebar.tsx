@@ -33,7 +33,7 @@ export default function AppSidebar() {
             <div className="p-1.5 rounded-lg bg-primary">
                 <Bot className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h1 className="text-xl font-semibold font-headline">Life OS</h1>
+            <h1 className="text-xl font-semibold font-headline group-data-[collapsible=icon]:hidden">Life OS</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -42,7 +42,8 @@ export default function AppSidebar() {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} legacyBehavior passHref>
                 <SidebarMenuButton
-                  isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/assistant')}
+                  tooltip={item.label}
+                  isActive={pathname.startsWith(item.href)}
                   asChild
                 >
                   <a>
@@ -59,19 +60,19 @@ export default function AppSidebar() {
         <Separator className="my-2" />
         <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => toggleSidebar()}>
+                <SidebarMenuButton onClick={() => toggleSidebar()} tooltip="Collapse">
                     <PanelLeft />
                     <span>Collapse</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton tooltip="Help & Support">
                     <LifeBuoy />
                     <span>Help & Support</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton tooltip="Settings">
                     <Settings />
                     <span>Settings</span>
                 </SidebarMenuButton>
