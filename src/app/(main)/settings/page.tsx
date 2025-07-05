@@ -3,18 +3,21 @@
 
 import { useTheme } from 'next-themes';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useAuth } from '@/contexts/AuthContext';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Palette, Landmark, KeyRound, AlertTriangle } from 'lucide-react';
+import { Palette, Landmark, KeyRound, AlertTriangle, LogOut } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 export default function SettingsPage() {
   const { setTheme, theme } = useTheme();
   const { currency, setCurrency, geminiApiKey, setGeminiApiKey } = useSettings();
+  const { logout } = useAuth();
 
   return (
     <div className="p-4 md:p-6">
@@ -22,7 +25,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Manage your application preferences and configurations."
       />
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 max-w-4xl mx-auto">
         <div className="space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center gap-4">
@@ -86,8 +89,6 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-        <div className="space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center gap-4">
               <KeyRound className="w-6 h-6 text-primary" />
@@ -120,6 +121,18 @@ export default function SettingsPage() {
                )}
             </CardContent>
           </Card>
+           <Card>
+             <CardHeader>
+                <CardTitle>Account</CardTitle>
+                <CardDescription>Manage your account settings.</CardDescription>
+             </CardHeader>
+             <CardContent>
+                 <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log Out
+                 </Button>
+             </CardContent>
+           </Card>
         </div>
       </div>
     </div>

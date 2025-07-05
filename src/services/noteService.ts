@@ -19,16 +19,18 @@ const fromFirestoreToNote = (docSnap: any): Note => {
     };
 };
 
-export async function getNotes(): Promise<Note[]> {
-  const notesCol = collection(db, 'notes');
+export async function getNotes(userId: string): Promise<Note[]> {
+  if (!userId) return [];
+  const notesCol = collection(db, `users/${userId}/notes`);
   const q = query(notesCol, orderBy('updatedAt', 'desc'));
   const notesSnapshot = await getDocs(q);
   const notesList = notesSnapshot.docs.map(doc => fromFirestoreToNote(doc));
   return notesList;
 }
 
-export async function addNote(note: { title: string; content: string; tags?: string[] }): Promise<Note> {
-    const newNoteRef = await addDoc(collection(db, 'notes'), {
+export async function addNote(userId: string, note: { title: string; content: string; tags?: string[] }): Promise<Note> {
+    if (!userId) throw new Error("User not authenticated");
+    const newNoteRef = await addDoc(collection(db, `users/${userId}/notes`), {
         ...note,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -37,8 +39,9 @@ export async function addNote(note: { title: string; content: string; tags?: str
     return fromFirestoreToNote(newNoteSnap);
 }
 
-export async function updateNote(noteId: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>): Promise<Note | null> {
-    const noteRef = doc(db, 'notes', noteId);
+export async function updateNote(userId: string, noteId: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>): Promise<Note | null> {
+    if (!userId) throw new Error("User not authenticated");
+    const noteRef = doc(db, `users/${userId}/notes`, noteId);
     try {
         await updateDoc(noteRef, {
             ...updates,
@@ -52,9 +55,10 @@ export async function updateNote(noteId: string, updates: Partial<Omit<Note, 'id
     }
 }
 
-export async function deleteNote(noteId: string): Promise<{ success: boolean }> {
+export async function deleteNote(userId: string, noteId: string): Promise<{ success: boolean }> {
+    if (!userId) throw new Error("User not authenticated");
     try {
-        await deleteDoc(doc(db, 'notes', noteId));
+        await deleteDoc(doc(db, `users/${userId}/notes`, noteId));
         return { success: true };
     } catch (error) {
         console.error("Error deleting note: ", error);

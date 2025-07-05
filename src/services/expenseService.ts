@@ -21,8 +21,9 @@ const fromFirestoreToTransaction = (docSnap: any): Transaction => {
     };
 };
 
-export async function getExpenses(): Promise<Transaction[]> {
-    const transCol = collection(db, 'transactions');
+export async function getExpenses(userId: string): Promise<Transaction[]> {
+    if (!userId) return [];
+    const transCol = collection(db, `users/${userId}/transactions`);
     const q = query(transCol, orderBy('date', 'desc'));
     const transSnapshot = await getDocs(q);
     return transSnapshot.docs.map(fromFirestoreToTransaction);
@@ -36,13 +37,14 @@ type AddTransactionInput = {
     description: string;
     date: string; // from form
 }
-export async function addTransaction(transaction: AddTransactionInput): Promise<Transaction> {
+export async function addTransaction(userId: string, transaction: AddTransactionInput): Promise<Transaction> {
+    if (!userId) throw new Error("User not authenticated");
     const newTransactionData = {
         ...transaction,
         amount: parseFloat(transaction.amount),
         date: new Date(transaction.date),
     };
-    const newTransRef = await addDoc(collection(db, 'transactions'), newTransactionData);
+    const newTransRef = await addDoc(collection(db, `users/${userId}/transactions`), newTransactionData);
     const newTransSnap = await getDoc(newTransRef);
     return fromFirestoreToTransaction(newTransSnap);
 }

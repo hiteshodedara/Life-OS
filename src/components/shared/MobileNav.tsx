@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Sparkles, CreditCard, ClipboardList, Notebook, Settings } from 'lucide-react'
+import { Sparkles, CreditCard, ClipboardList, Notebook, User } from 'lucide-react'
 import { cn } from "@/lib/utils"
 
 const menuItems = [
@@ -10,7 +10,7 @@ const menuItems = [
   { href: '/expenses', label: 'Expenses', icon: CreditCard },
   { href: '/todos', label: 'To-Do', icon: ClipboardList },
   { href: '/notes', label: 'Notes', icon: Notebook },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/settings', label: 'Profile', icon: User },
 ]
 
 export default function MobileNav() {

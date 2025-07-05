@@ -17,21 +17,24 @@ const fromFirestoreToTodo = (docSnap: any): Todo => {
 };
 
 
-export async function getTodos(): Promise<Todo[]> {
-    const todosCol = collection(db, 'todos');
+export async function getTodos(userId: string): Promise<Todo[]> {
+    if (!userId) return [];
+    const todosCol = collection(db, `users/${userId}/todos`);
     const q = query(todosCol, orderBy('priority')); // Example ordering
     const todoSnapshot = await getDocs(q);
     return todoSnapshot.docs.map(fromFirestoreToTodo);
 }
 
-export async function addTodo(task: { title: string; content?: string; priority: 'low' | 'medium' | 'high'; dueDate?: string | null; status: Todo['status'] }): Promise<Todo> {
-  const newTodoRef = await addDoc(collection(db, 'todos'), task);
+export async function addTodo(userId: string, task: { title: string; content?: string; priority: 'low' | 'medium' | 'high'; dueDate?: string | null; status: Todo['status'] }): Promise<Todo> {
+  if (!userId) throw new Error("User not authenticated");
+  const newTodoRef = await addDoc(collection(db, `users/${userId}/todos`), task);
   const newTodoSnap = await getDoc(newTodoRef);
   return fromFirestoreToTodo(newTodoSnap);
 }
 
-export async function updateTodo(taskId: string, updates: Partial<Omit<Todo, 'id'>>): Promise<Todo | null> {
-    const todoRef = doc(db, 'todos', taskId);
+export async function updateTodo(userId: string, taskId: string, updates: Partial<Omit<Todo, 'id'>>): Promise<Todo | null> {
+    if (!userId) throw new Error("User not authenticated");
+    const todoRef = doc(db, `users/${userId}/todos`, taskId);
     try {
         await updateDoc(todoRef, updates);
         const updatedTodoSnap = await getDoc(todoRef);
@@ -42,9 +45,10 @@ export async function updateTodo(taskId: string, updates: Partial<Omit<Todo, 'id
     }
 }
 
-export async function deleteTodo(taskId: string): Promise<{ success: boolean }> {
+export async function deleteTodo(userId: string, taskId: string): Promise<{ success: boolean }> {
+    if (!userId) throw new Error("User not authenticated");
     try {
-        await deleteDoc(doc(db, 'todos', taskId));
+        await deleteDoc(doc(db, `users/${userId}/todos`, taskId));
         return { success: true };
     } catch (error) {
         console.error("Error deleting todo: ", error);

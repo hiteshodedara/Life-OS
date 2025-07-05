@@ -11,8 +11,10 @@ import { getNotes, addNote, updateNote, deleteNote } from "@/services/noteServic
 import { useToast } from "@/hooks/use-toast"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import NoteListSkeleton from "@/features/notes/components/NoteListSkeleton"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function NotesPage() {
+  const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -22,20 +24,21 @@ export default function NotesPage() {
 
   useEffect(() => {
     const fetchNotes = async () => {
-      setIsLoading(true)
+      if (!user) return;
+      setIsLoading(true);
       try {
-        const fetchedNotes = await getNotes()
+        const fetchedNotes = await getNotes(user.uid);
         // sort by most recently updated
         fetchedNotes.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-        setNotes(fetchedNotes)
+        setNotes(fetchedNotes);
       } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: "Failed to load notes." })
+        toast({ variant: "destructive", title: "Error", description: "Failed to load notes." });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
-    fetchNotes()
-  }, [toast])
+    };
+    fetchNotes();
+  }, [user, toast]);
 
   const handleNewNote = () => {
     setSelectedNote(null)
@@ -48,15 +51,16 @@ export default function NotesPage() {
   }
 
   const handleSaveNote = async (data: any, noteId?: string) => {
+    if (!user) return;
     try {
       if (noteId) {
-        const updatedNote = await updateNote(noteId, data)
+        const updatedNote = await updateNote(user.uid, noteId, data);
         if (updatedNote) {
             setNotes(currentNotes => currentNotes.map(n => n.id === noteId ? updatedNote : n).sort((a,b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()))
             toast({ title: "Success", description: "Note updated." })
         }
       } else {
-        const newNote = await addNote(data)
+        const newNote = await addNote(user.uid, data);
         setNotes(currentNotes => [newNote, ...currentNotes])
         toast({ title: "Success", description: "Note created." })
       }
@@ -71,9 +75,9 @@ export default function NotesPage() {
   }
 
   const handleDelete = async () => {
-    if (!noteToDelete) return;
+    if (!noteToDelete || !user) return;
     try {
-        await deleteNote(noteToDelete)
+        await deleteNote(user.uid, noteToDelete);
         setNotes(currentNotes => currentNotes.filter(n => n.id !== noteToDelete))
         toast({ title: "Success", description: "Note deleted." })
     } catch (error) {

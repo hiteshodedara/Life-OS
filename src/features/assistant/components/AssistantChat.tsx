@@ -26,7 +26,11 @@ const staticJokes = [
     "I've got a great UDP joke, but I'm not sure you'll get it."
 ];
 
-export default function AssistantChat() {
+type AssistantChatProps = {
+  userId: string;
+}
+
+export default function AssistantChat({ userId }: AssistantChatProps) {
   const { geminiApiKey } = useSettings();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -94,6 +98,7 @@ export default function AssistantChat() {
       const historyForAI = newMessages.slice(1, -1).map(m => ({ role: m.role, content: m.content }));
       
       const result = await answerProductivityQuestion({ 
+          userId,
           question,
           history: historyForAI
       });

@@ -11,30 +11,33 @@ import { useToast } from "@/hooks/use-toast"
 import { getTodos, addTodo, updateTodo, deleteTodo } from "@/services/todoService"
 import type { Todo } from "@/lib/types"
 import TodoBoardSkeleton from "@/features/todos/components/TodoBoardSkeleton"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function TodosPage() {
-  const [tasks, setTasks] = useState<Todo[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<Todo | null>(null)
-  const [initialStatus, setInitialStatus] = useState<Todo['status'] | undefined>(undefined)
-  const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
-  const { toast } = useToast()
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState<Todo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Todo | null>(null);
+  const [initialStatus, setInitialStatus] = useState<Todo['status'] | undefined>(undefined);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchTasks = async () => {
-      setIsLoading(true)
+      if (!user) return;
+      setIsLoading(true);
       try {
-        const fetchedTasks = await getTodos()
-        setTasks(fetchedTasks)
+        const fetchedTasks = await getTodos(user.uid);
+        setTasks(fetchedTasks);
       } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: "Failed to load tasks." })
+        toast({ variant: "destructive", title: "Error", description: "Failed to load tasks." });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
-    fetchTasks()
-  }, [toast])
+    };
+    fetchTasks();
+  }, [user, toast]);
 
   const handleOpenDialogForAdd = (status: Todo['status']) => {
     setSelectedTask(null)
@@ -49,15 +52,16 @@ export default function TodosPage() {
   }
 
   const handleSaveTask = async (data: any, taskId?: string) => {
+    if (!user) return;
     try {
       if (taskId) {
-        const updatedTask = await updateTodo(taskId, data)
+        const updatedTask = await updateTodo(user.uid, taskId, data);
         if (updatedTask) {
           setTasks(currentTasks => currentTasks.map(t => t.id === taskId ? updatedTask : t))
           toast({ title: "Success", description: "Task updated successfully." })
         }
       } else {
-        const newTask = await addTodo({ ...data, status: data.status || 'todo' })
+        const newTask = await addTodo(user.uid, { ...data, status: data.status || 'todo' });
         setTasks(currentTasks => [newTask, ...currentTasks])
         toast({ title: "Success", description: "Task added successfully." })
       }
@@ -72,9 +76,9 @@ export default function TodosPage() {
   }
 
   const handleDeleteTask = async () => {
-    if (!taskToDelete) return;
+    if (!taskToDelete || !user) return;
     try {
-        await deleteTodo(taskToDelete)
+        await deleteTodo(user.uid, taskToDelete);
         setTasks(currentTasks => currentTasks.filter(t => t.id !== taskToDelete))
         toast({ title: "Success", description: "Task deleted." })
     } catch (error) {

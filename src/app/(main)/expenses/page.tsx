@@ -15,34 +15,38 @@ import ExpenseDashboardSkeleton from '@/features/expenses/components/ExpenseDash
 import RecentTransactionsSkeleton from '@/features/expenses/components/RecentTransactionsSkeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ExpensesPage() {
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchTransactions = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getExpenses();
-      setTransactions(data);
-    } catch (error) {
-      console.error(error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to load transactions. Make sure your Firebase configuration is correct." });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchTransactions = async () => {
+      if (!user) return;
+      setIsLoading(true);
+      try {
+        const data = await getExpenses(user.uid);
+        setTransactions(data);
+      } catch (error) {
+        console.error(error);
+        toast({ variant: "destructive", title: "Error", description: "Failed to load transactions." });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchTransactions();
-  }, []);
+  }, [user, toast]);
 
   const handleAddTransaction = async (data: any) => {
+    if (!user) return;
     try {
-      await addTransaction(data);
+      await addTransaction(user.uid, data);
       toast({ title: "Success", description: "Transaction added." });
-      fetchTransactions(); // Refetch transactions
+      const updatedTransactions = await getExpenses(user.uid); // Refetch transactions
+      setTransactions(updatedTransactions);
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "Error", description: "Failed to add transaction." });

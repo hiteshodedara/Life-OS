@@ -9,10 +9,11 @@
  */
 
 import {ai} from '@/ai/genkit';
-import { getExpenses } from '@/services/expenseService';
+import { getExpenses, addTransaction } from '@/services/expenseService';
 import { getNotes, addNote, updateNote, deleteNote } from '@/services/noteService';
 import { getTodos, addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import {z} from 'genkit';
+import { tool, type ToolRequest } from 'genkit';
 
 // This represents the history format from the client
 const HistoryMessageSchema = z.object({
@@ -21,6 +22,7 @@ const HistoryMessageSchema = z.object({
 });
 
 const AnswerProductivityQuestionInputSchema = z.object({
+  userId: z.string().describe("The authenticated user's ID."),
   question: z.string().describe('The latest message from the user.'),
   history: z.array(HistoryMessageSchema).describe("The conversation history so far."),
 });
@@ -107,72 +109,66 @@ export async function answerProductivityQuestion(input: AnswerProductivityQuesti
   return answerProductivityQuestionFlow(input);
 }
 
-const getExpensesTool = ai.defineTool({
+const getExpensesTool = tool({
     name: 'getExpenses',
     description: "Get a list of the user's recent financial transactions.",
     outputSchema: z.array(TransactionSchema),
-  },
-  async () => getExpenses()
-);
+});
 
-const getTodosTool = ai.defineTool({
+const getTodosTool = tool({
     name: 'getTodos',
     description: "Get the user's current list of to-do items.",
     outputSchema: z.array(TodoSchema),
-  },
-  async () => getTodos()
-);
+});
 
-const getNotesTool = ai.defineTool({
+const getNotesTool = tool({
     name: 'getNotes',
     description: "Get the user's saved notes.",
     outputSchema: z.array(NoteSchema),
-  },
-  async () => getNotes()
-);
+});
 
-const addNoteTool = ai.defineTool({
+const addNoteTool = tool({
   name: 'addNote',
   description: "Add a new note to the user's notes.",
   inputSchema: AddNoteInputSchema,
   outputSchema: NoteSchema,
-}, async (input) => addNote(input));
+});
 
-const updateNoteTool = ai.defineTool({
+const updateNoteTool = tool({
     name: 'updateNote',
     description: "Update an existing note. Use this to change title, content, or tags.",
     inputSchema: UpdateNoteInputSchema,
     outputSchema: z.union([NoteSchema, z.null()]),
-}, async ({ noteId, updates }) => updateNote(noteId, updates));
+});
 
-const deleteNoteTool = ai.defineTool({
+const deleteNoteTool = tool({
     name: 'deleteNote',
     description: "Delete a note from the user's list.",
     inputSchema: DeleteNoteInputSchema,
     outputSchema: z.object({ success: z.boolean() }),
-}, async ({ noteId }) => deleteNote(noteId));
+});
 
 
-const addTodoTool = ai.defineTool({
+const addTodoTool = tool({
   name: 'addTodo',
   description: "Add a new to-do item to the user's list. Default status is 'todo'.",
   inputSchema: AddTodoInputSchema,
   outputSchema: TodoSchema,
-}, async (input) => addTodo(input));
+});
 
-const updateTodoTool = ai.defineTool({
+const updateTodoTool = tool({
     name: 'updateTodo',
     description: "Update an existing to-do item. Use this to change status, priority, title, etc.",
     inputSchema: UpdateTodoInputSchema,
     outputSchema: z.union([TodoSchema, z.null()]),
-}, async ({ taskId, updates }) => updateTodo(taskId, updates));
+});
 
-const deleteTodoTool = ai.defineTool({
+const deleteTodoTool = tool({
     name: 'deleteTodo',
     description: "Delete a to-do item from the user's list.",
     inputSchema: DeleteTodoInputSchema,
     outputSchema: z.object({ success: z.boolean() }),
-}, async ({ taskId }) => deleteTodo(taskId));
+});
 
 
 const prompt = ai.definePrompt({
@@ -209,15 +205,42 @@ const answerProductivityQuestionFlow = ai.defineFlow(
     outputSchema: AnswerProductivityQuestionOutputSchema,
   },
   async (input) => {
+    const { userId } = input;
+    
     // Map client-side history to Genkit's message format
     const history = input.history.map((msg) => ({
       role: msg.role === 'assistant' ? ('model' as const) : ('user' as const),
       content: [{ text: msg.content }],
     }));
 
+    const toolCallback = async (req: ToolRequest) => {
+        switch (req.name) {
+            case 'getExpenses':
+                return getExpenses(userId);
+            case 'getTodos':
+                return getTodos(userId);
+            case 'getNotes':
+                return getNotes(userId);
+            case 'addTodo':
+                return addTodo(userId, req.input);
+            case 'updateTodo':
+                return updateTodo(userId, req.input.taskId, req.input.updates);
+            case 'deleteTodo':
+                return deleteTodo(userId, req.input.taskId);
+            case 'addNote':
+                return addNote(userId, req.input);
+            case 'updateNote':
+                return updateNote(userId, req.input.noteId, req.input.updates);
+            case 'deleteNote':
+                return deleteNote(userId, req.input.noteId);
+            default:
+                throw new Error(`Unknown tool: ${req.name}`);
+        }
+    };
+    
     const { output } = await prompt(
       { question: input.question },
-      { history }
+      { history, toolCallback }
     );
     
     return output!;

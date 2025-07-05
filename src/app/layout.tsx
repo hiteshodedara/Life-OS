@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   applicationName: 'Life OS',
@@ -44,10 +45,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
-          <Analytics/>
-          <SpeedInsights/>
+          <AuthProvider>
+            {children}
+            <Toaster />
+            <Analytics/>
+            <SpeedInsights/>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
