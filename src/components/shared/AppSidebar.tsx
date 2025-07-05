@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Sparkles, Wallet, CheckSquare, FileText, Bot, LifeBuoy, Settings } from 'lucide-react'
+import { Sparkles, Wallet, CheckSquare, FileText, Bot, LifeBuoy, Settings, PanelLeft } from 'lucide-react'
+import { useSidebar } from "@/components/ui/sidebar"
 
 import {
   SidebarHeader,
@@ -23,6 +24,7 @@ const menuItems = [
 
 export default function AppSidebar() {
   const pathname = usePathname()
+  const { toggleSidebar } = useSidebar();
 
   return (
     <>
@@ -56,6 +58,12 @@ export default function AppSidebar() {
       <SidebarFooter>
         <Separator className="my-2" />
         <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => toggleSidebar()}>
+                    <PanelLeft />
+                    <span>Collapse</span>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton>
                     <LifeBuoy />
