@@ -16,12 +16,16 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 
-const menuItems = [
+const mainMenuItems = [
   { href: '/assistant', label: 'Assistant', icon: Sparkles },
   { href: '/expenses', label: 'Expenses', icon: Wallet },
   { href: '/todos', label: 'To-Do', icon: CheckSquare },
   { href: '/notes', label: 'Notes', icon: FileText },
+]
+
+const utilityMenuItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/help', label: 'Help & Support', icon: LifeBuoy },
 ]
 
 export default function AppSidebar() {
@@ -40,7 +44,7 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((item) => (
+          {mainMenuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 tooltip={item.label}
@@ -57,18 +61,28 @@ export default function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
+         <SidebarMenu>
+          {utilityMenuItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                tooltip={item.label}
+                isActive={pathname.startsWith(item.href)}
+                asChild
+              >
+                <Link href={item.href}>
+                  <item.icon />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
         <Separator className="my-2" />
         <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => toggleSidebar()} tooltip="Collapse">
                     <PanelLeft />
                     <span>Collapse</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Help & Support">
-                    <LifeBuoy />
-                    <span>Help & Support</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
