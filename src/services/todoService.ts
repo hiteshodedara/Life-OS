@@ -5,14 +5,14 @@ import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, getDoc, query, 
 
 // Helper to convert Firestore doc to Todo type
 const fromFirestoreToTodo = (docSnap: any): Todo => {
-    const data = docSnap.data();
+    const data = docSnap.data() || {};
     return {
         id: docSnap.id,
-        title: data.title,
-        content: data.content,
-        priority: data.priority,
-        status: data.status,
-        dueDate: data.dueDate || null, // Assuming dueDate is stored as a string
+        title: data.title || 'Untitled Task',
+        content: data.content || '',
+        priority: data.priority || 'medium',
+        status: data.status || 'todo',
+        dueDate: data.dueDate || null,
     };
 };
 

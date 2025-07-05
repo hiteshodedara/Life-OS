@@ -5,14 +5,17 @@ import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, Timestamp, serv
 
 // Helper to convert Firestore doc to Note type
 const fromFirestoreToNote = (docSnap: any): Note => {
-    const data = docSnap.data();
+    const data = docSnap.data() || {};
+    const createdAt = data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : new Date().toISOString();
+    const updatedAt = data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : new Date().toISOString();
+
     return {
         id: docSnap.id,
-        title: data.title,
-        content: data.content,
-        tags: data.tags,
-        createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-        updatedAt: (data.updatedAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+        title: data.title || "Untitled Note",
+        content: data.content || "",
+        tags: data.tags || [],
+        createdAt: createdAt,
+        updatedAt: updatedAt,
     };
 };
 

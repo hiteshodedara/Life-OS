@@ -5,14 +5,19 @@ import { collection, getDocs, addDoc, doc, getDoc, query, orderBy, Timestamp } f
 
 // Helper
 const fromFirestoreToTransaction = (docSnap: any): Transaction => {
-    const data = docSnap.data();
+    const data = docSnap.data() || {};
+    // Ensure date is handled safely, checking if it's a Firestore Timestamp
+    const date = data.date instanceof Timestamp 
+        ? data.date.toDate().toISOString() 
+        : new Date().toISOString();
+
     return {
         id: docSnap.id,
-        type: data.type,
-        category: data.category,
-        amount: data.amount,
-        date: (data.date as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-        description: data.description,
+        type: data.type || 'expense', // Provide defaults to prevent crashes
+        category: data.category || 'Uncategorized',
+        amount: data.amount || 0,
+        date: date,
+        description: data.description || '',
     };
 };
 
