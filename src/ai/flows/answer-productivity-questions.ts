@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import { getExpenses } from '@/services/expenseService';
 import { getNotes, addNote } from '@/services/noteService';
-import { getTodos, addTodo } from '@/services/todoService';
+import { getTodos, addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import {z} from 'genkit';
 
 const AnswerProductivityQuestionInputSchema = z.object({
@@ -62,8 +62,24 @@ const AddNoteInputSchema = z.object({
 const AddTodoInputSchema = z.object({
   title: z.string().describe("The title of the task."),
   priority: z.enum(['low', 'medium', 'high']).describe("The priority of the task."),
-  dueDate: z.string().describe("The due date in ISO 8601 format. Can be an empty string.").optional(),
+  dueDate: z.string().nullable().describe("The due date in ISO 8601 format. Can be null if not set.").optional(),
   content: z.string().describe("The content or description for the task. Can be an empty string.").optional(),
+  status: z.enum(['todo', 'in-progress', 'done']).default('todo').describe("The status of the task."),
+});
+
+const UpdateTodoInputSchema = z.object({
+  taskId: z.string().describe("The ID of the task to update."),
+  updates: z.object({
+    title: z.string().optional(),
+    content: z.string().optional(),
+    status: z.enum(['todo', 'in-progress', 'done']).optional(),
+    priority: z.enum(['low', 'medium', 'high']).optional(),
+    dueDate: z.string().nullable().optional().describe("The new due date in ISO 8601 format, or null to remove it."),
+  }).describe("An object containing the fields to update.")
+});
+
+const DeleteTodoInputSchema = z.object({
+  taskId: z.string().describe("The ID of the task to delete."),
 });
 
 
@@ -104,30 +120,46 @@ const addNoteTool = ai.defineTool({
 
 const addTodoTool = ai.defineTool({
   name: 'addTodo',
-  description: "Add a new to-do item to the user's list.",
+  description: "Add a new to-do item to the user's list. Default status is 'todo'.",
   inputSchema: AddTodoInputSchema,
   outputSchema: TodoSchema,
 }, async (input) => addTodo(input));
+
+const updateTodoTool = ai.defineTool({
+    name: 'updateTodo',
+    description: "Update an existing to-do item. Use this to change status, priority, title, etc.",
+    inputSchema: UpdateTodoInputSchema,
+    outputSchema: z.union([TodoSchema, z.null()]),
+}, async ({ taskId, updates }) => updateTodo(taskId, updates));
+
+const deleteTodoTool = ai.defineTool({
+    name: 'deleteTodo',
+    description: "Delete a to-do item from the user's list.",
+    inputSchema: DeleteTodoInputSchema,
+    outputSchema: z.object({ success: z.boolean() }),
+}, async ({ taskId }) => deleteTodo(taskId));
 
 
 const prompt = ai.definePrompt({
   name: 'answerProductivityQuestionPrompt',
   input: {schema: AnswerProductivityQuestionInputSchema},
   output: {schema: AnswerProductivityQuestionOutputSchema},
-  tools: [getExpensesTool, getTodosTool, getNotesTool, addNoteTool, addTodoTool],
+  tools: [getExpensesTool, getTodosTool, getNotesTool, addNoteTool, addTodoTool, updateTodoTool, deleteTodoTool],
   system: `You are a powerful and friendly AI assistant for a "Life OS" application. Your main goal is to help users manage their life and be more productive.
 
 You have access to a set of tools to interact with the user's data:
 - You can retrieve their expenses, to-do lists, and notes.
-- You can add new to-do items and notes on their behalf.
+- You can add, update, and delete to-do items and notes on their behalf.
 
 When a user asks a question, first determine if you need to use a tool.
 - If they ask about their data (e.g., "what are my outstanding tasks?", "how much did I spend on food?"), use the appropriate 'get' tool.
 - If they ask you to create something (e.g., "add a task to buy milk", "create a note about my project idea"), use the appropriate 'add' tool.
+- If they ask you to change something (e.g., "mark 'buy milk' as done", "change priority of Q3 report to low"), use the 'update' tool. You will likely need to get the list of todos first to find the correct ID.
+- If they ask you to remove something (e.g., "delete the task about the dentist"), use the 'delete' tool. You will likely need to get the list of todos first to find the correct ID.
 - If the question is general, answer it without using a tool.
 
 When you use a tool to get data, present the information to the user in a clear, summarized, and easy-to-read format. Don't just dump the raw data.
-When you use a tool to add data, always confirm the action with the user by telling them what you've done (e.g., "I've added 'Buy milk' to your to-do list.").
+When you use a tool to add, update, or delete data, always confirm the action with the user by telling them what you've done (e.g., "I've added 'Buy milk' to your to-do list.", "I've marked 'Finalize Q3 report' as done.", "I've deleted the task 'Schedule dentist appointment'.").
 
 Always be friendly, concise, and helpful in your responses.`,
   prompt: `{{{question}}}`,
