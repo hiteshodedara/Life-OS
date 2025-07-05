@@ -20,7 +20,7 @@ export default function RecentTransactions() {
           <TableHeader>
             <TableRow>
               <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead className="hidden md:table-cell">Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
           </TableHeader>
@@ -31,7 +31,7 @@ export default function RecentTransactions() {
                   <div className="font-medium">{t.description}</div>
                   <div className="text-sm text-muted-foreground">{new Date(t.date).toLocaleDateString()}</div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                     <Badge variant="outline">{t.category}</Badge>
                 </TableCell>
                 <TableCell className={cn("text-right", t.type === 'income' ? 'text-green-600' : 'text-destructive-foreground bg-destructive/10 rounded-md')}>

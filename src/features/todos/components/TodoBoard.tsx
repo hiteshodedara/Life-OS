@@ -25,14 +25,14 @@ export default function TodoBoard() {
   };
 
   return (
-    <div className="w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    <div className="w-full md:h-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch md:h-full">
             {columns.map(column => (
-            <div key={column.status} className="w-full">
+            <div key={column.status} className="w-full flex flex-col">
                 <div className="p-2 rounded-lg bg-muted mb-4">
                     <h2 className="text-lg font-semibold font-headline text-center">{column.title} ({tasks.filter(t => t.status === column.status).length})</h2>
                 </div>
-                <ScrollArea className="h-[calc(100vh-18rem)] rounded-md">
+                <ScrollArea className="rounded-md md:flex-1">
                     <div className="space-y-4 pr-4">
                         {tasks
                         .filter(task => task.status === column.status)

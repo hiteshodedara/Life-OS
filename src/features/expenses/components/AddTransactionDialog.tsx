@@ -39,9 +39,9 @@ export default function AddTransactionDialog({ children }: { children: ReactNode
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Type</Label>
-              <RadioGroup defaultValue="expense" className="col-span-3 flex gap-4">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-4 md:items-center md:gap-4">
+              <Label className="md:text-right">Type</Label>
+              <RadioGroup defaultValue="expense" className="md:col-span-3 flex gap-4">
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="expense" id="r1" />
                     <Label htmlFor="r1">Expense</Label>
@@ -52,24 +52,24 @@ export default function AddTransactionDialog({ children }: { children: ReactNode
                 </div>
               </RadioGroup>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-4 md:items-center md:gap-4">
+              <Label htmlFor="description" className="md:text-right">
                 Description
               </Label>
-              <Input id="description" placeholder="e.g., Coffee" className="col-span-3" />
+              <Input id="description" placeholder="e.g., Coffee" className="md:col-span-3" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-right">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-4 md:items-center md:gap-4">
+              <Label htmlFor="amount" className="md:text-right">
                 Amount
               </Label>
-              <Input id="amount" type="number" placeholder="e.g., 5.00" className="col-span-3" />
+              <Input id="amount" type="number" placeholder="e.g., 5.00" className="md:col-span-3" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-4 md:items-center md:gap-4">
+              <Label htmlFor="category" className="md:text-right">
                 Category
               </Label>
                <Select>
-                    <SelectTrigger className="col-span-3">
+                    <SelectTrigger className="md:col-span-3">
                         <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>

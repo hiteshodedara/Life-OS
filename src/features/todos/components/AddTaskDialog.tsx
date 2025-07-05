@@ -45,7 +45,7 @@ export default function AddTaskDialog({ children }: { children: ReactNode }) {
               <Label htmlFor="content">Description (Optional)</Label>
               <Textarea id="content" placeholder="Add more details..."/>
             </div>
-             <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="grid items-center gap-1.5">
                     <Label htmlFor="priority">Priority</Label>
                     <Select>
