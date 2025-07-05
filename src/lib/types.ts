@@ -12,8 +12,8 @@ export type Todo = {
   title: string;
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
-  dueDate: string | null;
-  content?: string;
+  dueDate: string;
+  content: string;
 };
 
 export type Note = {

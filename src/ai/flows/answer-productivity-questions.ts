@@ -39,8 +39,8 @@ const TodoSchema = z.object({
     title: z.string(),
     status: z.enum(['todo', 'in-progress', 'done']),
     priority: z.enum(['low', 'medium', 'high']),
-    dueDate: z.string().nullable(),
-    content: z.string().optional(),
+    dueDate: z.string().describe("The due date in ISO 8601 format. Empty if not set."),
+    content: z.string().describe("The content of the task. Empty if not set."),
 });
 
 const NoteSchema = z.object({
@@ -62,8 +62,8 @@ const AddNoteInputSchema = z.object({
 const AddTodoInputSchema = z.object({
   title: z.string().describe("The title of the task."),
   priority: z.enum(['low', 'medium', 'high']).describe("The priority of the task."),
-  dueDate: z.string().describe("The due date in ISO 8601 format. Can be null.").optional().nullable(),
-  content: z.string().describe("The content or description for the task.").optional(),
+  dueDate: z.string().describe("The due date in ISO 8601 format. Can be an empty string.").optional(),
+  content: z.string().describe("The content or description for the task. Can be an empty string.").optional(),
 });
 
 
