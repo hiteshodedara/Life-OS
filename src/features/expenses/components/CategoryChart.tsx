@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
 import { mockTransactions } from "@/lib/data"
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
@@ -38,8 +38,8 @@ export default function CategoryChart() {
         <CardTitle>Spending by Category</CardTitle>
         <CardDescription>A breakdown of your expenses this month.</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+      <CardContent className="flex-1 pb-4">
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
           <PieChart>
             <Tooltip
               cursor={false}
@@ -56,14 +56,12 @@ export default function CategoryChart() {
                 <Cell key={`cell-${entry.name}`} fill={chartConfig[entry.name]?.color} className="stroke-background" />
               ))}
             </Pie>
+            <ChartLegend
+              content={<ChartLegendContent nameKey="name" />}
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
-       <CardFooter className="flex-col gap-2 text-sm mt-4">
-        <ChartLegend
-          content={<ChartLegendContent nameKey="name" />}
-        />
-      </CardFooter>
     </Card>
   )
 }
