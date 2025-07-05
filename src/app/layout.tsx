@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   applicationName: 'Life OS',
@@ -44,6 +46,8 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <Analytics/>
+          <SpeedInsights/>
         </ThemeProvider>
       </body>
     </html>
