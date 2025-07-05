@@ -16,24 +16,36 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [geminiApiKey, setGeminiApiKeyState] = useState('');
 
   useEffect(() => {
-    const storedCurrency = localStorage.getItem('lifeos-currency');
-    if (storedCurrency) {
-      setCurrencyState(storedCurrency);
-    }
-    const storedApiKey = localStorage.getItem('lifeos-gemini-api-key');
-    if (storedApiKey) {
-      setGeminiApiKeyState(storedApiKey);
+    try {
+      const storedCurrency = localStorage.getItem('lifeos-currency');
+      if (storedCurrency) {
+        setCurrencyState(storedCurrency);
+      }
+      const storedApiKey = localStorage.getItem('lifeos-gemini-api-key');
+      if (storedApiKey) {
+        setGeminiApiKeyState(storedApiKey);
+      }
+    } catch (error) {
+      console.error("Could not access localStorage:", error);
     }
   }, []);
 
   const setCurrency = (newCurrency: string) => {
-    localStorage.setItem('lifeos-currency', newCurrency);
-    setCurrencyState(newCurrency);
+    try {
+      localStorage.setItem('lifeos-currency', newCurrency);
+      setCurrencyState(newCurrency);
+    } catch (error) {
+        console.error("Could not access localStorage:", error);
+    }
   };
 
   const setGeminiApiKey = (newKey: string) => {
-    localStorage.setItem('lifeos-gemini-api-key', newKey);
-    setGeminiApiKeyState(newKey);
+    try {
+      localStorage.setItem('lifeos-gemini-api-key', newKey);
+      setGeminiApiKeyState(newKey);
+    } catch (error) {
+        console.error("Could not access localStorage:", error);
+    }
   }
 
   return (

@@ -115,8 +115,6 @@ export default function SettingsPage() {
                   <AlertTitle>Action Required</AlertTitle>
                   <AlertDescription>
                     The AI assistant will not work without an API key. You can get a free key from Google AI Studio.
-                    <br/><br/>
-                    <strong>Important:</strong> For the key to be used by the server, you must also copy it into the <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">.env</code> file at the project root as <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">GEMINI_API_KEY=...</code> and restart your development server.
                   </AlertDescription>
                 </Alert>
                )}

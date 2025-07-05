@@ -10,24 +10,55 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { answerProductivityQuestion } from '@/ai/flows/answer-productivity-questions';
+import { generateJoke } from '@/ai/flows/generate-joke';
 
 type Message = {
+  id: string;
   role: 'user' | 'assistant';
   content: string;
 };
 
+const staticJokes = [
+    "Why don't programmers like nature? It has too many bugs.",
+    "Why did the computer keep sneezing? It had a virus!",
+    "What's a computer's favorite snack? Microchips!",
+    "Why was the JavaScript developer sad? Because he didn't Node how to Express himself.",
+    "I've got a great UDP joke, but I'm not sure you'll get it."
+];
+
 export default function AssistantChat() {
   const { geminiApiKey } = useSettings();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: "Hello! I'm your Life OS assistant. How can I help you be more productive today? You can ask me to manage your tasks, notes, or analyze your data for suggestions.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const getGreeting = async () => {
+      const greetingId = 'initial-greeting';
+      setMessages([{ id: greetingId, role: 'assistant', content: 'Thinking of a good joke for you...' }]);
+      
+      let joke;
+      
+      if (geminiApiKey) {
+        try {
+          const result = await generateJoke();
+          joke = result.joke;
+        } catch (error) {
+          console.error("Failed to fetch AI joke:", error);
+          joke = staticJokes[Math.floor(Math.random() * staticJokes.length)];
+        }
+      } else {
+        joke = staticJokes[Math.floor(Math.random() * staticJokes.length)];
+      }
+
+      setMessages([{ id: greetingId, role: 'assistant', content: joke + "\n\nI can also help you be more productive. What's on your mind?" }]);
+    };
+    
+    getGreeting();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,12 +72,13 @@ export default function AssistantChat() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input };
+    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
 
     if (!geminiApiKey) {
         setMessages((prev) => [...prev, userMessage, {
+            id: Date.now().toString() + '-error',
             role: 'assistant',
-            content: "It looks like your Gemini API key isn't set up. Please go to the Settings page to add your key. You can get one for free from Google AI Studio.\n\nRemember, for the AI to fully work, you also need to set the key in your project's .env file and restart the server."
+            content: "It looks like your Gemini API key isn't set up. Please go to the Settings page to add your key so I can help you."
         }]);
         setInput('');
         return;
@@ -59,19 +91,20 @@ export default function AssistantChat() {
     setIsLoading(true);
 
     try {
-      const historyForAI = newMessages.slice(0, -1);
+      const historyForAI = newMessages.slice(1, -1).map(m => ({ role: m.role, content: m.content }));
       
       const result = await answerProductivityQuestion({ 
           question,
           history: historyForAI
       });
-      const assistantMessage: Message = { role: 'assistant', content: result.answer };
+      const assistantMessage: Message = { id: Date.now().toString(), role: 'assistant', content: result.answer };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error(error);
       const errorMessage: Message = {
+        id: Date.now().toString() + '-error',
         role: 'assistant',
-        content: "Sorry, I encountered an error. This might be due to an invalid or missing API key on the server. Please ensure your Gemini API key is correctly set in the .env file and that you've restarted your server.",
+        content: "Sorry, I encountered an error. This might be due to an issue with the server-side API key configuration. Please ensure it's set up correctly.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -84,9 +117,9 @@ export default function AssistantChat() {
       <CardContent className="flex-1 overflow-hidden p-0 pt-6">
         <ScrollArea ref={scrollAreaRef} className="h-full px-6">
           <div className="space-y-4">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div
-                key={index}
+                key={message.id}
                 className={cn(
                   'flex items-start gap-3',
                   message.role === 'user' ? 'justify-end' : 'justify-start'
