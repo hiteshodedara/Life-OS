@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/shared/PageHeader"
 import { Button } from "@/components/ui/button"
-import { PlusCircle, Loader2 } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import ExpenseDashboard from "@/features/expenses/components/ExpenseDashboard"
 import RecentTransactions from "@/features/expenses/components/RecentTransactions"
 import CategoryChart from "@/features/expenses/components/CategoryChart"
@@ -11,6 +11,10 @@ import AddTransactionDialog from "@/features/expenses/components/AddTransactionD
 import { getExpenses, addTransaction } from '@/services/expenseService';
 import type { Transaction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import ExpenseDashboardSkeleton from '@/features/expenses/components/ExpenseDashboardSkeleton';
+import RecentTransactionsSkeleton from '@/features/expenses/components/RecentTransactionsSkeleton';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ExpensesPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -60,8 +64,24 @@ export default function ExpensesPage() {
         }
       />
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="space-y-6">
+          <ExpenseDashboardSkeleton />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+            <div className="lg:col-span-4">
+              <RecentTransactionsSkeleton />
+            </div>
+            <div className="lg:col-span-3">
+               <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle>Spending by Category</CardTitle>
+                  <CardDescription>A breakdown of your expenses this month.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 pb-4 flex items-center justify-center">
+                   <Skeleton className="aspect-square w-full max-w-[300px] rounded-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="space-y-6">

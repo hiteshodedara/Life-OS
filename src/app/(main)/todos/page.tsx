@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast"
 import { getTodos, addTodo, updateTodo, deleteTodo } from "@/services/todoService"
 import type { Todo } from "@/lib/types"
+import TodoBoardSkeleton from "@/features/todos/components/TodoBoardSkeleton"
 
 export default function TodosPage() {
   const [tasks, setTasks] = useState<Todo[]>([])
@@ -96,7 +97,7 @@ export default function TodosPage() {
       />
       <div className="flex-1 overflow-x-auto">
         {isLoading ? (
-            <p className="text-center text-muted-foreground">Loading tasks...</p>
+            <TodoBoardSkeleton />
         ) : (
             <TodoBoard 
                 tasks={tasks}

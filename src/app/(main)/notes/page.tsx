@@ -10,6 +10,7 @@ import type { Note } from "@/lib/types"
 import { getNotes, addNote, updateNote, deleteNote } from "@/services/noteService"
 import { useToast } from "@/hooks/use-toast"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import NoteListSkeleton from "@/features/notes/components/NoteListSkeleton"
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([])
@@ -94,7 +95,7 @@ export default function NotesPage() {
         }
       />
        {isLoading ? (
-            <p className="text-center text-muted-foreground">Loading notes...</p>
+            <NoteListSkeleton />
         ) : (
             <NoteList
                 notes={notes}

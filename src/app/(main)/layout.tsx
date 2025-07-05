@@ -1,4 +1,5 @@
 import AppSidebar from '@/components/shared/AppSidebar';
+import MobileNav from '@/components/shared/MobileNav';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 
@@ -10,12 +11,13 @@ export default function MainLayout({
   return (
     <SettingsProvider>
       <SidebarProvider>
-        <Sidebar>
+        <Sidebar className="hidden md:block">
           <AppSidebar />
         </Sidebar>
         <SidebarInset>
           {children}
         </SidebarInset>
+        <MobileNav />
       </SidebarProvider>
     </SettingsProvider>
   );

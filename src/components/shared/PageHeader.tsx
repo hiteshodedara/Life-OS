@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 
 type PageHeaderProps = {
   title: string;
@@ -12,7 +11,6 @@ export default function PageHeader({ title, description, actions }: PageHeaderPr
     <div className="mb-8">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <SidebarTrigger className="md:hidden" />
           <div className="grid gap-1">
             <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">{title}</h1>
           </div>
