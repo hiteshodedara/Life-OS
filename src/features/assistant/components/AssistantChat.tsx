@@ -1,16 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { Bot, Sparkles, User, Send, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Bot, User, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { answerProductivityQuestion } from '@/ai/flows/answer-productivity-questions';
-import { analyzeAndSuggestImprovements } from '@/ai/flows/analyze-and-suggest-improvements';
-import { mockTransactions, mockTodos, mockNotes } from '@/lib/data';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -21,26 +19,48 @@ export default function AssistantChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Hello! I'm your Life OS assistant. How can I help you be more productive today?",
+      content: "Hello! I'm your Life OS assistant. How can I help you be more productive today? You can ask me to manage your tasks, notes, or analyze your data for suggestions.",
     },
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (scrollArea) {
+      const viewport = scrollArea.querySelector('div[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        setTimeout(() => {
+            viewport.scrollTop = viewport.scrollHeight;
+        }, 0);
+      }
+    }
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    const question = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      const result = await answerProductivityQuestion({ question: input });
+      // Pass all previous messages as history. The last message is the current question.
+      const historyForAI = newMessages.slice(0, -1);
+      
+      const result = await answerProductivityQuestion({ 
+          question,
+          history: historyForAI
+      });
       const assistantMessage: Message = { role: 'assistant', content: result.answer };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      console.error(error);
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
@@ -51,42 +71,10 @@ export default function AssistantChat() {
     }
   };
 
-  const handleGetSuggestions = async () => {
-    if (isLoading) return;
-    const userMessage: Message = { role: 'user', content: 'Give me some suggestions based on my data.' };
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
-    try {
-      const result = await analyzeAndSuggestImprovements({
-        expenseData: JSON.stringify(mockTransactions),
-        todoData: JSON.stringify(mockTodos),
-        noteData: JSON.stringify(mockNotes),
-      });
-      const assistantMessage: Message = { role: 'assistant', content: result.suggestions };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error(error);
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, I couldn\'t analyze your data. Please try again.',
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <Card className="flex-1 flex flex-col h-full max-h-[calc(100vh-10rem)]">
-      <CardHeader>
-        <Button onClick={handleGetSuggestions} disabled={isLoading}>
-          <Sparkles className="mr-2 h-4 w-4" />
-          Get Personalized Suggestions
-        </Button>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full pr-4">
+      <CardContent className="flex-1 overflow-hidden p-0 pt-6">
+        <ScrollArea ref={scrollAreaRef} className="h-full px-6">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -138,7 +126,7 @@ export default function AssistantChat() {
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="p-6 border-t">
         <form onSubmit={handleSendMessage} className="flex w-full items-center space-x-2">
           <Input
             value={input}

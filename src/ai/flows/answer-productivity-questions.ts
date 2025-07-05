@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Provides an AI assistant that answers questions and performs tasks, using user data when necessary.
+ * @fileOverview Provides a conversational AI assistant that answers questions and performs tasks, using user data when necessary and maintaining conversation history.
  *
- * - answerProductivityQuestion - A function that handles answering productivity questions.
+ * - answerProductivityQuestion - A function that handles answering productivity questions with conversation context.
  * - AnswerProductivityQuestionInput - The input type for the answerProductivityQuestion function.
  * - AnswerProductivityQuestionOutput - The return type for the answerProductivityQuestion function.
  */
@@ -14,8 +14,15 @@ import { getNotes, addNote, updateNote, deleteNote } from '@/services/noteServic
 import { getTodos, addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import {z} from 'genkit';
 
+// This represents the history format from the client
+const HistoryMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+});
+
 const AnswerProductivityQuestionInputSchema = z.object({
-  question: z.string().describe('The productivity or life-related question to be answered, or a command to create an item.'),
+  question: z.string().describe('The latest message from the user.'),
+  history: z.array(HistoryMessageSchema).describe("The conversation history so far."),
 });
 export type AnswerProductivityQuestionInput = z.infer<typeof AnswerProductivityQuestionInputSchema>;
 
@@ -170,7 +177,7 @@ const deleteTodoTool = ai.defineTool({
 
 const prompt = ai.definePrompt({
   name: 'answerProductivityQuestionPrompt',
-  input: {schema: AnswerProductivityQuestionInputSchema},
+  input: {schema: z.object({ question: z.string() })},
   output: {schema: AnswerProductivityQuestionOutputSchema},
   tools: [getExpensesTool, getTodosTool, getNotesTool, addNoteTool, addTodoTool, updateTodoTool, deleteTodoTool, updateNoteTool, deleteNoteTool],
   system: `You are a powerful and friendly AI assistant for a "Life OS" application. Your main goal is to help users manage their life and be more productive.
@@ -178,18 +185,20 @@ const prompt = ai.definePrompt({
 You have access to a set of tools to interact with the user's data:
 - You can retrieve their expenses, to-do lists, and notes.
 - You can add, update, and delete to-do items and notes on their behalf.
+- You can also analyze their data to provide personalized suggestions for improvement if they ask for it.
 
-When a user asks a question, first determine if you need to use a tool.
+When a user asks a question, first determine if you need to use a tool based on the current question and the conversation history.
 - If they ask about their data (e.g., "what are my outstanding tasks?", "how much did I spend on food?"), use the appropriate 'get' tool.
 - If they ask you to create something (e.g., "add a task to buy milk", "create a note about my project idea"), use the appropriate 'add' tool.
 - If they ask you to change something (e.g., "mark 'buy milk' as done", "change priority of Q3 report to low", "update my note about the meeting"), use the 'update' tool. You will likely need to get the list of todos or notes first to find the correct ID.
 - If they ask you to remove something (e.g., "delete the task about the dentist", "remove my recipe note"), use the 'delete' tool. You will likely need to get the list of todos or notes first to find the correct ID.
 - If the question is general, answer it without using a tool.
+- If the user asks for suggestions, use the 'get' tools to retrieve relevant data and provide actionable advice.
 
 When you use a tool to get data, present the information to the user in a clear, summarized, and easy-to-read format. Don't just dump the raw data.
 When you use a tool to add, update, or delete data, always confirm the action with the user by telling them what you've done (e.g., "I've added 'Buy milk' to your to-do list.", "I've updated your meeting notes.", "I've deleted the task 'Schedule dentist appointment'.").
 
-Always be friendly, concise, and helpful in your responses.`,
+Always be friendly, concise, and helpful in your responses. Use the conversation history to understand context.`,
   prompt: `{{{question}}}`,
 });
 
@@ -199,8 +208,18 @@ const answerProductivityQuestionFlow = ai.defineFlow(
     inputSchema: AnswerProductivityQuestionInputSchema,
     outputSchema: AnswerProductivityQuestionOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    // Map client-side history to Genkit's message format
+    const history = input.history.map((msg) => ({
+      role: msg.role === 'assistant' ? ('model' as const) : ('user' as const),
+      content: [{ text: msg.content }],
+    }));
+
+    const { output } = await prompt(
+      { question: input.question },
+      { history }
+    );
+    
     return output!;
   }
 );
