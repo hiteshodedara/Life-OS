@@ -9,15 +9,17 @@ type PageHeaderProps = {
 
 export default function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
-    <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between mb-8">
-      <div className="flex items-center gap-4">
-        <SidebarTrigger className="md:hidden" />
-        <div className="grid gap-1">
-          <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">{title}</h1>
-          {description && <p className="text-muted-foreground">{description}</p>}
+    <div className="mb-8">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger className="md:hidden" />
+          <div className="grid gap-1">
+            <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">{title}</h1>
+          </div>
         </div>
+        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
       </div>
-      {actions && <div className="flex w-full items-center justify-end gap-2 md:w-auto">{actions}</div>}
+      {description && <p className="text-muted-foreground mt-2">{description}</p>}
     </div>
   );
 }
