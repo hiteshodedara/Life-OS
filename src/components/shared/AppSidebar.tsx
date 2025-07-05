@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Sparkles, Wallet, CheckSquare, FileText, Bot, LifeBuoy, Settings, PanelLeft } from 'lucide-react'
+import { Sparkles, CreditCard, ClipboardList, Notebook, Bot, LifeBuoy, Settings, PanelLeft } from 'lucide-react'
 import { useSidebar } from "@/components/ui/sidebar"
 
 import {
@@ -18,9 +18,9 @@ import { Separator } from "@/components/ui/separator"
 
 const mainMenuItems = [
   { href: '/assistant', label: 'Assistant', icon: Sparkles },
-  { href: '/expenses', label: 'Expenses', icon: Wallet },
-  { href: '/todos', label: 'To-Do', icon: CheckSquare },
-  { href: '/notes', label: 'Notes', icon: FileText },
+  { href: '/expenses', label: 'Expenses', icon: CreditCard },
+  { href: '/todos', label: 'To-Do', icon: ClipboardList },
+  { href: '/notes', label: 'Notes', icon: Notebook },
 ]
 
 const utilityMenuItems = [
@@ -36,7 +36,7 @@ export default function AppSidebar() {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary">
+            <div className="p-1.5 rounded-lg bg-gradient-primary">
                 <Bot className="w-6 h-6 text-primary-foreground" />
             </div>
             <h1 className="text-xl font-semibold font-headline group-data-[collapsible=icon]:hidden">Life OS</h1>

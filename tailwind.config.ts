@@ -15,6 +15,9 @@ export default {
         headline: ['PT Sans', 'sans-serif'],
         code: ['monospace'],
       },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)))',
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
