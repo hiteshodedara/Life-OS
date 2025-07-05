@@ -1,0 +1,55 @@
+import { mockTransactions } from "@/lib/data"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { DollarSign, ArrowUp, ArrowDown } from "lucide-react"
+
+export default function ExpenseDashboard() {
+  const totalIncome = mockTransactions
+    .filter((t) => t.type === 'income')
+    .reduce((acc, t) => acc + t.amount, 0)
+  const totalExpenses = mockTransactions
+    .filter((t) => t.type === 'expense')
+    .reduce((acc, t) => acc + t.amount, 0)
+  const balance = totalIncome - totalExpenses
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount)
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(balance)}</div>
+          <p className="text-xs text-muted-foreground">Your current account balance</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+          <ArrowUp className="h-4 w-4 text-green-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
+          <p className="text-xs text-muted-foreground">Income this month</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+          <ArrowDown className="h-4 w-4 text-red-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
+          <p className="text-xs text-muted-foreground">Expenses this month</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
