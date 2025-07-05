@@ -54,7 +54,7 @@ export default function NoteEditorSheet({ isOpen, onOpenChange, note }: NoteEdit
                         {note ? 'Make changes to your note here.' : 'Create a new note. Click save when you\'re done.'}
                     </SheetDescription>
                 </SheetHeader>
-                <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     <div className="grid items-center gap-1.5">
                         <Label htmlFor="title">Title</Label>
                         <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
