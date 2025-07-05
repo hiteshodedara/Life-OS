@@ -1,8 +1,15 @@
+
+'use client'
+
 import { mockTransactions } from "@/lib/data"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { DollarSign, ArrowUp, ArrowDown } from "lucide-react"
+import { useSettings } from "@/contexts/SettingsContext"
+import { formatCurrency } from "@/lib/utils"
 
 export default function ExpenseDashboard() {
+  const { currency } = useSettings()
+
   const totalIncome = mockTransactions
     .filter((t) => t.type === 'income')
     .reduce((acc, t) => acc + t.amount, 0)
@@ -10,13 +17,6 @@ export default function ExpenseDashboard() {
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => acc + t.amount, 0)
   const balance = totalIncome - totalExpenses
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
-  }
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -26,7 +26,7 @@ export default function ExpenseDashboard() {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(balance)}</div>
+          <div className="text-2xl font-bold">{formatCurrency(balance, currency)}</div>
           <p className="text-xs text-muted-foreground">Your current account balance</p>
         </CardContent>
       </Card>
@@ -36,7 +36,7 @@ export default function ExpenseDashboard() {
           <ArrowUp className="h-4 w-4 text-green-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
+          <div className="text-2xl font-bold">{formatCurrency(totalIncome, currency)}</div>
           <p className="text-xs text-muted-foreground">Income this month</p>
         </CardContent>
       </Card>
@@ -46,7 +46,7 @@ export default function ExpenseDashboard() {
           <ArrowDown className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
+          <div className="text-2xl font-bold">{formatCurrency(totalExpenses, currency)}</div>
           <p className="text-xs text-muted-foreground">Expenses this month</p>
         </CardContent>
       </Card>

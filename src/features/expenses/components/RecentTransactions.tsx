@@ -1,13 +1,16 @@
+
+'use client'
+
 import { mockTransactions } from "@/lib/data";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useSettings } from "@/contexts/SettingsContext";
+import { formatCurrency } from "@/lib/utils";
 
 export default function RecentTransactions() {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-  };
+  const { currency } = useSettings();
   
   return (
     <Card>
@@ -36,7 +39,7 @@ export default function RecentTransactions() {
                 </TableCell>
                 <TableCell className={cn("text-right", t.type === 'income' ? 'text-green-600' : 'text-destructive-foreground bg-destructive/10 rounded-md')}>
                   {t.type === 'income' ? '+' : '-'}
-                  {formatCurrency(t.amount)}
+                  {formatCurrency(t.amount, currency)}
                 </TableCell>
               </TableRow>
             ))}

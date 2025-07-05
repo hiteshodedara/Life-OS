@@ -1,5 +1,6 @@
 import AppSidebar from '@/components/shared/AppSidebar';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 
 export default function MainLayout({
   children,
@@ -7,13 +8,15 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <AppSidebar />
-      </Sidebar>
-      <SidebarInset>
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+    <SettingsProvider>
+      <SidebarProvider>
+        <Sidebar>
+          <AppSidebar />
+        </Sidebar>
+        <SidebarInset>
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
+    </SettingsProvider>
   );
 }

@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from "next/link"
@@ -20,6 +21,7 @@ const menuItems = [
   { href: '/expenses', label: 'Expenses', icon: Wallet },
   { href: '/todos', label: 'To-Do', icon: CheckSquare },
   { href: '/notes', label: 'Notes', icon: FileText },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function AppSidebar() {
@@ -69,12 +71,6 @@ export default function AppSidebar() {
                 <SidebarMenuButton tooltip="Help & Support">
                     <LifeBuoy />
                     <span>Help & Support</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Settings">
-                    <Settings />
-                    <span>Settings</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
