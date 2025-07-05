@@ -1,14 +1,23 @@
-
 'use client'
 
+import type { ElementType } from 'react';
 import { mockTransactions } from "@/lib/data"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { DollarSign, ArrowUp, ArrowDown } from "lucide-react"
+import { DollarSign, ArrowUp, ArrowDown, Euro, IndianRupee, JapaneseYen, PoundSterling } from "lucide-react"
 import { useSettings } from "@/contexts/SettingsContext"
 import { formatCurrency } from "@/lib/utils"
 
+const currencyIcons: Record<string, ElementType> = {
+  USD: DollarSign,
+  EUR: Euro,
+  JPY: JapaneseYen,
+  GBP: PoundSterling,
+  INR: IndianRupee,
+};
+
 export default function ExpenseDashboard() {
   const { currency } = useSettings()
+  const CurrencyIcon = currencyIcons[currency] || DollarSign;
 
   const totalIncome = mockTransactions
     .filter((t) => t.type === 'income')
@@ -23,7 +32,7 @@ export default function ExpenseDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CurrencyIcon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(balance, currency)}</div>
