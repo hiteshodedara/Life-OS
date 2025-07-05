@@ -14,7 +14,7 @@ export async function addTodo(task: { title: string; content?: string; priority:
     title: task.title,
     content: task.content || '',
     priority: task.priority,
-    dueDate: task.dueDate || '',
+    dueDate: task.dueDate || null,
   };
   mockTodos.unshift(newTodo);
   return newTodo;

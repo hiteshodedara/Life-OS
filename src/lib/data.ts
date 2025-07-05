@@ -15,11 +15,11 @@ export const mockTodos: Todo[] = [
   { id: '1', title: 'Finalize Q3 report', status: 'in-progress', priority: 'high', dueDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), content: 'Review P&L and write executive summary.' },
   { id: '2', title: 'Schedule dentist appointment', status: 'todo', priority: 'medium', dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(), content: "Call Dr. Smith's office for a check-up and cleaning." },
   { id: '3', title: 'Buy birthday gift for Sarah', status: 'todo', priority: 'high', dueDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), content: 'She likes books or candles.' },
-  { id: '4', title: 'Complete Next.js tutorial', status: 'done', priority: 'low', dueDate: '', content: 'Finished the course on the App Router.' },
+  { id: '4', title: 'Complete Next.js tutorial', status: 'done', priority: 'low', dueDate: null, content: 'Finished the course on the App Router.' },
   { id: '5', title: 'Draft project proposal', status: 'in-progress', priority: 'high', dueDate: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(), content: 'Outline the scope, timeline, and budget for Project Phoenix.' },
   { id: '6', title: 'Weekly grocery shopping', status: 'todo', priority: 'medium', dueDate: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(), content: 'Need milk, eggs, bread, chicken, and vegetables.' },
-  { id: '7', 'title': 'Pay credit card bill', 'status': 'done', 'priority': 'high', dueDate: '', content: 'Paid the full balance for this month.' },
-  { id: '8', title: 'Call Mom', status: 'todo', priority: 'low', dueDate: '', content: 'Check in and see how she is doing.' },
+  { id: '7', 'title': 'Pay credit card bill', 'status': 'done', 'priority': 'high', dueDate: null, content: 'Paid the full balance for this month.' },
+  { id: '8', title: 'Call Mom', status: 'todo', priority: 'low', dueDate: null, content: 'Check in and see how she is doing.' },
 ];
 
 export const mockNotes: Note[] = [

@@ -12,7 +12,7 @@ export type Todo = {
   title: string;
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
-  dueDate: string;
+  dueDate: string | null;
   content: string;
 };
 

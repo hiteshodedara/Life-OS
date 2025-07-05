@@ -39,8 +39,8 @@ const TodoSchema = z.object({
     title: z.string(),
     status: z.enum(['todo', 'in-progress', 'done']),
     priority: z.enum(['low', 'medium', 'high']),
-    dueDate: z.string().describe("The due date in ISO 8601 format. Empty if not set."),
-    content: z.string().describe("The content of the task. Empty if not set."),
+    dueDate: z.string().nullable().describe("The due date in ISO 8601 format. Can be null if not set."),
+    content: z.string().describe("The content of the task."),
 });
 
 const NoteSchema = z.object({
