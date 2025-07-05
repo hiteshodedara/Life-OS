@@ -105,7 +105,7 @@ export default function AssistantChat() {
                 )}
                 <div
                   className={cn(
-                    'max-w-sm rounded-lg px-4 py-2 text-sm md:max-w-md lg:max-w-lg',
+                    'max-w-[85%] sm:max-w-[80%] md:max-w-[75%] rounded-lg px-4 py-2 text-sm',
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted'
