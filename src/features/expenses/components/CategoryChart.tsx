@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
 import { mockTransactions } from "@/lib/data"
-import { PieChart, Pie, Cell, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell } from 'recharts'
 import { useMemo } from "react"
 
 export default function CategoryChart() {
@@ -41,7 +41,7 @@ export default function CategoryChart() {
       <CardContent className="flex-1 pb-4">
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
           <PieChart>
-            <Tooltip
+            <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
