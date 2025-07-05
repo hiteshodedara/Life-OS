@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSettings } from '@/contexts/SettingsContext';
 import { Bot, User, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ type Message = {
 };
 
 export default function AssistantChat() {
+  const { geminiApiKey } = useSettings();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -40,6 +42,16 @@ export default function AssistantChat() {
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: input };
+
+    if (!geminiApiKey) {
+        setMessages((prev) => [...prev, userMessage, {
+            role: 'assistant',
+            content: "It looks like your Gemini API key isn't set up. Please go to the Settings page to add your key. You can get one for free from Google AI Studio.\n\nRemember, for the AI to fully work, you also need to set the key in your project's .env file and restart the server."
+        }]);
+        setInput('');
+        return;
+    }
+
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     const question = input;
@@ -47,7 +59,6 @@ export default function AssistantChat() {
     setIsLoading(true);
 
     try {
-      // Pass all previous messages as history. The last message is the current question.
       const historyForAI = newMessages.slice(0, -1);
       
       const result = await answerProductivityQuestion({ 
@@ -60,7 +71,7 @@ export default function AssistantChat() {
       console.error(error);
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: "Sorry, I encountered an error. This might be due to an invalid or missing API key on the server. Please ensure your Gemini API key is correctly set in the .env file and that you've restarted your server.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

@@ -109,13 +109,17 @@ export default function SettingsPage() {
                     onChange={(e) => setGeminiApiKey(e.target.value)}
                   />
                </div>
-               <Alert>
+               {!geminiApiKey && (
+                <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Server Configuration Required</AlertTitle>
+                  <AlertTitle>Action Required</AlertTitle>
                   <AlertDescription>
-                    For the AI assistant to work, you must copy this key into the <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">.env</code> file at the root of your project as <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">GEMINI_API_KEY=...</code> and restart your server.
+                    The AI assistant will not work without an API key. You can get a free key from Google AI Studio.
+                    <br/><br/>
+                    <strong>Important:</strong> For the key to be used by the server, you must also copy it into the <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">.env</code> file at the project root as <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">GEMINI_API_KEY=...</code> and restart your development server.
                   </AlertDescription>
                 </Alert>
+               )}
             </CardContent>
           </Card>
         </div>
