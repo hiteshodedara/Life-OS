@@ -9,7 +9,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetFooter,
-  SheetClose
 } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,23 +16,29 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState } from "react"
 
+type NoteData = {
+    title: string;
+    content: string;
+    tags: string[];
+}
 type NoteEditorSheetProps = {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     note: Note | null;
+    onSave: (data: NoteData, noteId?: string) => void;
 }
 
-export default function NoteEditorSheet({ isOpen, onOpenChange, note }: NoteEditorSheetProps) {
+export default function NoteEditorSheet({ isOpen, onOpenChange, note, onSave }: NoteEditorSheetProps) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [tags, setTags] = useState('');
 
     useEffect(() => {
-        if(note) {
+        if (note && isOpen) {
             setTitle(note.title);
             setContent(note.content);
             setTags(note.tags.join(', '));
-        } else {
+        } else if (!note && isOpen) {
             setTitle('');
             setContent('');
             setTags('');
@@ -41,9 +46,12 @@ export default function NoteEditorSheet({ isOpen, onOpenChange, note }: NoteEdit
     }, [note, isOpen])
 
     const handleSubmit = () => {
-        // In a real app, save the note
-        console.log({ title, content, tags: tags.split(',').map(t => t.trim()) });
-        onOpenChange(false);
+        const noteData: NoteData = {
+            title,
+            content,
+            tags: tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
+        }
+        onSave(noteData, note?.id);
     }
     
     return (
@@ -55,8 +63,7 @@ export default function NoteEditorSheet({ isOpen, onOpenChange, note }: NoteEdit
                         {note ? 'Make changes to your note here.' : 'Create a new note. Click save when you\'re done.'}
                     </SheetDescription>
                 </SheetHeader>
-                <div className="flex-1 min-h-0">
-                  <ScrollArea className="h-full">
+                <ScrollArea className="flex-1 min-h-0">
                     <div className="space-y-4 px-6 py-4">
                         <div className="grid items-center gap-1.5">
                             <Label htmlFor="title">Title</Label>
@@ -71,12 +78,9 @@ export default function NoteEditorSheet({ isOpen, onOpenChange, note }: NoteEdit
                             <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} />
                         </div>
                     </div>
-                  </ScrollArea>
-                </div>
-                <SheetFooter className="p-6">
-                    <SheetClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </SheetClose>
+                </ScrollArea>
+                <SheetFooter className="p-6 border-t">
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                     <Button onClick={handleSubmit}>Save Note</Button>
                 </SheetFooter>
             </SheetContent>

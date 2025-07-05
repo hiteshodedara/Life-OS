@@ -19,3 +19,22 @@ export async function addNote(note: { title: string; content: string; tags?: str
   mockNotes.unshift(newNote);
   return newNote;
 }
+
+export async function updateNote(noteId: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>): Promise<Note | null> {
+    const noteIndex = mockNotes.findIndex(n => n.id === noteId);
+    if (noteIndex === -1) {
+        return null;
+    }
+    const updatedNote = { ...mockNotes[noteIndex], ...updates, updatedAt: new Date().toISOString() };
+    mockNotes[noteIndex] = updatedNote;
+    return updatedNote;
+}
+
+export async function deleteNote(noteId: string): Promise<{ success: boolean }> {
+    const noteIndex = mockNotes.findIndex(n => n.id === noteId);
+    if (noteIndex > -1) {
+        mockNotes.splice(noteIndex, 1);
+        return { success: true };
+    }
+    return { success: false };
+}

@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import { getExpenses } from '@/services/expenseService';
-import { getNotes, addNote } from '@/services/noteService';
+import { getNotes, addNote, updateNote, deleteNote } from '@/services/noteService';
 import { getTodos, addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import {z} from 'genkit';
 
@@ -57,6 +57,19 @@ const AddNoteInputSchema = z.object({
   title: z.string().describe("The title of the note."),
   content: z.string().describe("The content of the note."),
   tags: z.array(z.string()).describe("An array of tags for the note.").optional(),
+});
+
+const UpdateNoteInputSchema = z.object({
+    noteId: z.string().describe("The ID of the note to update."),
+    updates: z.object({
+        title: z.string().optional(),
+        content: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+    }).describe("An object containing the fields to update.")
+});
+
+const DeleteNoteInputSchema = z.object({
+    noteId: z.string().describe("The ID of the note to delete."),
 });
 
 const AddTodoInputSchema = z.object({
@@ -118,6 +131,21 @@ const addNoteTool = ai.defineTool({
   outputSchema: NoteSchema,
 }, async (input) => addNote(input));
 
+const updateNoteTool = ai.defineTool({
+    name: 'updateNote',
+    description: "Update an existing note. Use this to change title, content, or tags.",
+    inputSchema: UpdateNoteInputSchema,
+    outputSchema: z.union([NoteSchema, z.null()]),
+}, async ({ noteId, updates }) => updateNote(noteId, updates));
+
+const deleteNoteTool = ai.defineTool({
+    name: 'deleteNote',
+    description: "Delete a note from the user's list.",
+    inputSchema: DeleteNoteInputSchema,
+    outputSchema: z.object({ success: z.boolean() }),
+}, async ({ noteId }) => deleteNote(noteId));
+
+
 const addTodoTool = ai.defineTool({
   name: 'addTodo',
   description: "Add a new to-do item to the user's list. Default status is 'todo'.",
@@ -144,7 +172,7 @@ const prompt = ai.definePrompt({
   name: 'answerProductivityQuestionPrompt',
   input: {schema: AnswerProductivityQuestionInputSchema},
   output: {schema: AnswerProductivityQuestionOutputSchema},
-  tools: [getExpensesTool, getTodosTool, getNotesTool, addNoteTool, addTodoTool, updateTodoTool, deleteTodoTool],
+  tools: [getExpensesTool, getTodosTool, getNotesTool, addNoteTool, addTodoTool, updateTodoTool, deleteTodoTool, updateNoteTool, deleteNoteTool],
   system: `You are a powerful and friendly AI assistant for a "Life OS" application. Your main goal is to help users manage their life and be more productive.
 
 You have access to a set of tools to interact with the user's data:
@@ -154,12 +182,12 @@ You have access to a set of tools to interact with the user's data:
 When a user asks a question, first determine if you need to use a tool.
 - If they ask about their data (e.g., "what are my outstanding tasks?", "how much did I spend on food?"), use the appropriate 'get' tool.
 - If they ask you to create something (e.g., "add a task to buy milk", "create a note about my project idea"), use the appropriate 'add' tool.
-- If they ask you to change something (e.g., "mark 'buy milk' as done", "change priority of Q3 report to low"), use the 'update' tool. You will likely need to get the list of todos first to find the correct ID.
-- If they ask you to remove something (e.g., "delete the task about the dentist"), use the 'delete' tool. You will likely need to get the list of todos first to find the correct ID.
+- If they ask you to change something (e.g., "mark 'buy milk' as done", "change priority of Q3 report to low", "update my note about the meeting"), use the 'update' tool. You will likely need to get the list of todos or notes first to find the correct ID.
+- If they ask you to remove something (e.g., "delete the task about the dentist", "remove my recipe note"), use the 'delete' tool. You will likely need to get the list of todos or notes first to find the correct ID.
 - If the question is general, answer it without using a tool.
 
 When you use a tool to get data, present the information to the user in a clear, summarized, and easy-to-read format. Don't just dump the raw data.
-When you use a tool to add, update, or delete data, always confirm the action with the user by telling them what you've done (e.g., "I've added 'Buy milk' to your to-do list.", "I've marked 'Finalize Q3 report' as done.", "I've deleted the task 'Schedule dentist appointment'.").
+When you use a tool to add, update, or delete data, always confirm the action with the user by telling them what you've done (e.g., "I've added 'Buy milk' to your to-do list.", "I've updated your meeting notes.", "I've deleted the task 'Schedule dentist appointment'.").
 
 Always be friendly, concise, and helpful in your responses.`,
   prompt: `{{{question}}}`,

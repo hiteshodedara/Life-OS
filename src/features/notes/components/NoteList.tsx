@@ -1,18 +1,18 @@
 'use client'
 
 import { useState } from "react"
-import { mockNotes } from "@/lib/data"
 import type { Note } from "@/lib/types"
 import NoteCard from "./NoteCard"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 
 type NoteListProps = {
+  notes: Note[];
   onEditNote: (note: Note) => void;
+  onDeleteNote: (noteId: string) => void;
 }
 
-export default function NoteList({ onEditNote }: NoteListProps) {
-  const [notes, setNotes] = useState<Note[]>(mockNotes)
+export default function NoteList({ notes, onEditNote, onDeleteNote }: NoteListProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   const filteredNotes = notes.filter(note =>
@@ -33,9 +33,12 @@ export default function NoteList({ onEditNote }: NoteListProps) {
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
         </div>
+        {notes.length === 0 && !searchTerm && (
+            <p className="text-center text-muted-foreground pt-8">You don't have any notes yet. Create one!</p>
+        )}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredNotes.map(note => (
-                <NoteCard key={note.id} note={note} onEdit={() => onEditNote(note)} />
+                <NoteCard key={note.id} note={note} onEdit={onEditNote} onDelete={onDeleteNote} />
             ))}
         </div>
     </div>
