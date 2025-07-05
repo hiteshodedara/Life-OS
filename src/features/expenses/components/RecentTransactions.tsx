@@ -1,7 +1,6 @@
-
 'use client'
 
-import { mockTransactions } from "@/lib/data";
+import type { Transaction } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +8,11 @@ import { cn } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
 import { formatCurrency } from "@/lib/utils";
 
-export default function RecentTransactions() {
+type RecentTransactionsProps = {
+  transactions: Transaction[];
+}
+
+export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
   const { currency } = useSettings();
   
   return (
@@ -28,7 +31,7 @@ export default function RecentTransactions() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockTransactions.slice(0, 5).map((t) => (
+            {transactions.slice(0, 5).map((t) => (
               <TableRow key={t.id}>
                 <TableCell>
                   <div className="font-medium">{t.description}</div>

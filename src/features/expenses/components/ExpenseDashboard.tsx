@@ -1,7 +1,7 @@
 'use client'
 
 import type { ElementType } from 'react';
-import { mockTransactions } from "@/lib/data"
+import type { Transaction } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { DollarSign, ArrowUp, ArrowDown, Euro, IndianRupee, JapaneseYen, PoundSterling } from "lucide-react"
 import { useSettings } from "@/contexts/SettingsContext"
@@ -15,14 +15,18 @@ const currencyIcons: Record<string, ElementType> = {
   INR: IndianRupee,
 };
 
-export default function ExpenseDashboard() {
+type ExpenseDashboardProps = {
+  transactions: Transaction[];
+}
+
+export default function ExpenseDashboard({ transactions }: ExpenseDashboardProps) {
   const { currency } = useSettings()
   const CurrencyIcon = currencyIcons[currency] || DollarSign;
 
-  const totalIncome = mockTransactions
+  const totalIncome = transactions
     .filter((t) => t.type === 'income')
     .reduce((acc, t) => acc + t.amount, 0)
-  const totalExpenses = mockTransactions
+  const totalExpenses = transactions
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => acc + t.amount, 0)
   const balance = totalIncome - totalExpenses
@@ -52,7 +56,7 @@ export default function ExpenseDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-          <ArrowDown className="h-4 w-4 text-red-500" />
+          <ArrowDown className="h-4 w-4 text-destructive" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(totalExpenses, currency)}</div>
