@@ -25,18 +25,15 @@ export default function AssistantChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
 
   useEffect(() => {
-    const scrollArea = scrollAreaRef.current;
-    if (scrollArea) {
-      const viewport = scrollArea.querySelector('div[data-radix-scroll-area-viewport]');
-      if (viewport) {
-        setTimeout(() => {
-            viewport.scrollTop = viewport.scrollHeight;
-        }, 0);
-      }
-    }
-  }, [messages]);
+    scrollToBottom()
+  }, [messages, isLoading]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +120,7 @@ export default function AssistantChat() {
                   </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </CardContent>
