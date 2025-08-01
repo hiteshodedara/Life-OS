@@ -9,8 +9,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { answerProductivityQuestion } from '@/ai/flows/answer-productivity-questions';
-import { generateJoke } from '@/ai/flows/generate-joke';
+import { generateJokeSecure } from '@/ai/flows/generate-joke';
+import { answerProductivityQuestionSecure } from '@/ai/flows/answer-productivity-questions';
 
 type Message = {
   id: string;
@@ -31,7 +31,7 @@ type AssistantChatProps = {
 }
 
 export default function AssistantChat({ userId }: AssistantChatProps) {
-  const { geminiApiKey } = useSettings();
+  const { geminiApiKey, isValidApiKey } = useSettings();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,9 +45,9 @@ export default function AssistantChat({ userId }: AssistantChatProps) {
       
       let joke;
       
-      if (geminiApiKey) {
+      if (geminiApiKey && isValidApiKey) {
         try {
-          const result = await generateJoke();
+          const result = await generateJokeSecure(geminiApiKey);
           joke = result.joke;
         } catch (error) {
           console.error("Failed to fetch AI joke:", error);
@@ -78,11 +78,22 @@ export default function AssistantChat({ userId }: AssistantChatProps) {
 
     const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
 
-    if (!geminiApiKey) {
+    if (!geminiApiKey || geminiApiKey.trim().length === 0) {
         setMessages((prev) => [...prev, userMessage, {
             id: Date.now().toString() + '-error',
             role: 'assistant',
             content: "It looks like your Gemini API key isn't set up. Please go to the Settings page to add your key so I can help you."
+        }]);
+        setInput('');
+        return;
+    }
+
+    // Use the isValidApiKey flag from context
+    if (!isValidApiKey) {
+        setMessages((prev) => [...prev, userMessage, {
+            id: Date.now().toString() + '-error',
+            role: 'assistant',
+            content: "Your API key doesn't appear to be valid. Please check that you've entered a valid Gemini API key in Settings."
         }]);
         setInput('');
         return;
@@ -97,19 +108,34 @@ export default function AssistantChat({ userId }: AssistantChatProps) {
     try {
       const historyForAI = newMessages.slice(1, -1).map(m => ({ role: m.role, content: m.content }));
       
-      const result = await answerProductivityQuestion({ 
+      const result = await answerProductivityQuestionSecure({ 
           userId,
           question,
-          history: historyForAI
+          history: historyForAI,
+          apiKey: geminiApiKey
       });
       const assistantMessage: Message = { id: Date.now().toString(), role: 'assistant', content: result.answer };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error(error);
+      let errorContent = "Sorry, I encountered an error. ";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Invalid API key') || error.message.includes('Invalid Gemini API key format')) {
+          errorContent += "It looks like your API key is invalid. Please check your API key in Settings.";
+        } else if (error.message.includes('API key')) {
+          errorContent += "There's an issue with your API key configuration. Please verify it in Settings.";
+        } else {
+          errorContent += "Please try again or check your internet connection.";
+        }
+      } else {
+        errorContent += "Please try again later.";
+      }
+      
       const errorMessage: Message = {
         id: Date.now().toString() + '-error',
         role: 'assistant',
-        content: "Sorry, I encountered an error. This might be due to an issue with the server-side API key configuration. Please ensure it's set up correctly.",
+        content: errorContent,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

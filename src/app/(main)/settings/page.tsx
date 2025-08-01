@@ -10,13 +10,13 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Palette, Landmark, KeyRound, AlertTriangle, LogOut } from 'lucide-react';
+import { Palette, Landmark, KeyRound, AlertTriangle, LogOut, CheckCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 export default function SettingsPage() {
   const { setTheme, theme } = useTheme();
-  const { currency, setCurrency, geminiApiKey, setGeminiApiKey } = useSettings();
+  const { currency, setCurrency, geminiApiKey, setGeminiApiKey, isValidApiKey } = useSettings();
   const { logout } = useAuth();
 
   return (
@@ -95,21 +95,67 @@ export default function SettingsPage() {
               <div>
                 <CardTitle>API Configuration</CardTitle>
                 <CardDescription>
-                  Manage API keys for third-party integrations.
+                  Securely configure your AI assistant with your Gemini API key.
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="space-y-2">
                   <Label htmlFor="gemini-key">Gemini API Key</Label>
-                  <Input 
-                    id="gemini-key" 
-                    type="password" 
-                    placeholder="Enter your Gemini API Key" 
-                    value={geminiApiKey}
-                    onChange={(e) => setGeminiApiKey(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="gemini-key" 
+                      type="password" 
+                      placeholder="Enter your Gemini API Key (starts with AIza...)" 
+                      value={geminiApiKey}
+                      onChange={(e) => setGeminiApiKey(e.target.value)}
+                      className={geminiApiKey && !isValidApiKey ? "border-destructive" : geminiApiKey && isValidApiKey ? "border-green-500" : ""}
+                    />
+                    {geminiApiKey && isValidApiKey && (
+                      <CheckCircle className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                    )}
+                  </div>
                </div>
+               
+               {/* Security Information */}
+               <Alert>
+                 <Info className="h-4 w-4" />
+                 <AlertTitle>Security Note</AlertTitle>
+                 <AlertDescription>
+                   Your API key is stored locally in your browser and transmitted securely to our servers. 
+                   We never store your API key on our servers. You can get a free API key from{' '}
+                   <a 
+                     href="https://aistudio.google.com/app/apikey" 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="text-primary underline hover:no-underline"
+                   >
+                     Google AI Studio
+                   </a>.
+                 </AlertDescription>
+               </Alert>
+
+               {/* Validation Messages */}
+               {geminiApiKey && !isValidApiKey && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Invalid API Key</AlertTitle>
+                  <AlertDescription>
+                    The API key format appears to be invalid. Gemini API keys should start with "AIza" and be at least 30 characters long.
+                  </AlertDescription>
+                </Alert>
+               )}
+               
+               {geminiApiKey && isValidApiKey && (
+                <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle>API Key Valid</AlertTitle>
+                  <AlertDescription>
+                    Your API key format looks correct! The AI assistant should now work properly.
+                  </AlertDescription>
+                </Alert>
+               )}
+               
                {!geminiApiKey && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
